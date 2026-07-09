@@ -1,22 +1,21 @@
 <div align="center">
-  <h1>🚀 Arquitectura Multi-Nube: Resiliencia y Auto Escalado</h1>
-  <p><i>Cómo construir una aplicación a prueba de caídas, explicada para humanos.</i></p>
-</div>
+  <h1>Arquitectura Multi-cloud</h1>
+  <p><i>Aplicación a prueba de caídas.</i></p></div>
 
 ---
 
-## 🎯 El Problema y Nuestra Solución
+## El Problema y Mi Solución
 
-Tradicionalmente, si subías tu página web a una computadora y esa computadora se apagaba o recibía demasiados visitantes, tu página **se caía por completo**. Nosotros hemos diseñado un sistema inteligente que se **auto-repara y clona a sí mismo** cuando detecta problemas, asegurando que el negocio nunca se detenga.
+Los servidores tradicionales se caen cuando reciben demasiado tráfico o sufren fallas. Para solucionar esto, **he diseñado** un sistema en la nube que se **auto-repara y clona a sí mismo** cuando detecta problemas, asegurando que la aplicación nunca se detenga.
 
 > [!IMPORTANT]
-> El objetivo principal de esta arquitectura no es la aplicación de Clientes en sí, sino **demostrar que el sistema es capaz de sobrevivir a picos extremos de tráfico y fallos físicos** utilizando servicios de clase mundial como AWS (Amazon) y Supabase.
+> El objetivo principal de mi proyecto es **demostrar que el sistema es capaz de sobrevivir a picos extremos de tráfico y fallos físicos** utilizando servicios de AWS (Amazon) y Supabase.
 
 ---
 
-## 🗺️ Diagrama Visual: El Flujo de Trabajo
+## Diagrama Visual: El Flujo de Trabajo
 
-*Observa cómo el Balanceador actúa de "recepcionista", repartiendo el trabajo equitativamente entre los clones del sistema.*
+*El Balanceador reparte el trabajo equitativamente entre los clones del sistema.*
 
 ```mermaid
 graph TD
@@ -28,7 +27,7 @@ graph TD
     classDef db fill:#10B981,stroke:#047857,stroke-width:2px,color:#fff;
 
     Usuario((👤 Usuario)):::usuario
-    
+  
     subgraph Nube de Amazon AWS
         ALB{🔀 Balanceador <br>de Carga}:::balancer
         
@@ -60,40 +59,35 @@ graph TD
 
 ---
 
-## 🧩 ¿Quién hace qué? (Las 4 Piezas Clave)
+## ¿Quién hace qué? (Las 4 Piezas Clave)
 
-Para entender esto fácil, imagina que nuestra aplicación es un gran **restaurante de lujo**:
+Para entender esto de forma simple, imagina que mi aplicación es un **restaurante**:
 
-1. **🔀 El Balanceador de Carga (Application Load Balancer):** Es el **Recepcionista**. Recibe a todos los clientes en la puerta y los reparte inteligentemente para que ningún camarero se llene de trabajo mientras otro no hace nada.
-2. **🖥️ El Frontend (React):** Son los **Camareros**. Es la cara bonita del restaurante, interactúan con el cliente, les muestran el menú (la interfaz web) y toman sus pedidos.
-3. **⚙️ El Backend (Django/Python):** Son los **Cocineros**. Están escondidos en la cocina haciendo el trabajo pesado. Validan que los ingredientes (datos) sean correctos y aplican la lógica estricta del negocio.
-4. **🗄️ La Base de Datos (Supabase):** Es la **Despensa**. Es una bodega súper segura ubicada en otra instalación distinta (otra Nube) donde se guardan permanentemente los datos reales de los clientes.
+1. **🔀 El Balanceador de Carga:** Es el **Recepcionista**. Recibe a los clientes en la puerta y los reparte para que ningún camarero se llene de trabajo.
+2. **🖥️ El Frontend (React):** Son los **Camareros**. Es la interfaz web, interactúa con el usuario y toma sus pedidos.
+3. **⚙️ El Backend (Django/Python):** Son los **Cocineros**. Hacen el trabajo pesado, validan los datos y aplican la lógica del negocio.
+4. **🗄️ La Base de Datos (Supabase):** Es la **Despensa**. Es la base de datos segura ubicada en otra nube donde se guardan los clientes.
 
 ---
 
-## 🦸‍♂️ Los Súper Poderes de Nuestra Arquitectura
+## Los Súper Poderes de mi Arquitectura
 
 ### 1. Auto-Clonación Inteligente (Auto Scaling)
-Imagina que un famoso menciona tu página web en vivo por televisión y de pronto entran 10,000 personas de golpe.
-
 > [!TIP]
-> **¿Cómo lo resolvemos?**
-> Tenemos "vigilantes virtuales" (AWS CloudWatch) midiendo el pulso de las computadoras. Si detectan que el procesador (CPU) de un servidor está sudando al **70% de su capacidad**, la Nube de Amazon **fabrica un clon exacto** en menos de 2 minutos. El Recepcionista (Balanceador) se da cuenta y empieza a mandarle visitantes al nuevo clon para aliviar el estrés. ¡Cuando la gente se va, el clon se destruye solo para ahorrarte dinero!
+> Tengo "vigilantes virtuales" (AWS CloudWatch) midiendo los servidores. Si la CPU llega al **70%**, Amazon **fabrica un clon exacto** en menos de 2 minutos. El Balanceador empieza a mandarle visitantes al clon para aliviar el estrés. Cuando el tráfico baja, el clon se destruye para ahorrar costos.
 
 ### 2. Inmunidad a Desastres (Zonas de Disponibilidad)
-Los servidores físicos son máquinas de metal que pueden fallar por apagones, incendios o catástrofes naturales.
-
 > [!WARNING]
-> Para evitar que la página se caiga si ocurre un desastre, Amazon divide sus Nubes en diferentes **Zonas de Disponibilidad** físicas. Hemos configurado el sistema para que nuestro servidor original esté en un edificio (ej: `us-east-1a`) y el servidor clonado esté en un edificio totalmente distinto a millas de distancia (ej: `us-east-1b`). Si se va la electricidad en un edificio, el otro asume el 100% del trabajo y el usuario ni se entera.
+> Para evitar que la página se caiga si ocurre un desastre en un centro de datos, he configurado el sistema en diferentes **Zonas de Disponibilidad**. Mi servidor original está en un edificio (`us-east-1a`) y el servidor clonado está en otro (`us-east-1b`). Si se va la luz en uno, el otro asume el 100% del trabajo sin interrupciones.
 
 ### 3. Cero Mantenimiento (Serverless)
-Hemos utilizado la tecnología de vanguardia **AWS ECS Fargate**. Esto significa que es una arquitectura "Sin Servidor". No tenemos que preocuparnos por instalar Windows, Linux, antivirus, ni actualizar parches de seguridad. Nosotros solo entregamos nuestro código y Amazon se encarga de administrar los servidores invisibles mágicamente.
+He utilizado **AWS ECS Fargate**, una arquitectura "Sin Servidor". No tengo que preocuparme por instalar sistemas operativos ni antivirus. Yo solo entrego el código y Amazon administra los servidores subyacentes.
 
 ---
 
-## 📊 Panel de Control (Monitor en Tiempo Real)
+## Panel de Control (Monitor en Tiempo Real)
 
-Para demostrar que todo esto es real y no solo teoría, hemos programado un **Monitor de Estrés Interactivo** directamente en la aplicación.
+He programado un **Monitor de Estrés Interactivo** en la aplicación para demostrar esto en vivo.
 
-* **¿Para qué sirve?** Al presionar el botón *"Iniciar Test"*, la aplicación empieza a bombardear a los servidores con peticiones, simulando tráfico intenso.
-* **¿Qué verás?** Observarás en vivo y en directo unas barras de progreso azules y verdes que revelan el identificador único de AWS y la dirección IP Privada de cada contenedor. Podrás ver visualmente cómo el Balanceador de Carga está repartiendo el peso al 50/50, e incluso ver nacer un nuevo clon si mantienes el estrés lo suficiente.
+* **¿Para qué sirve?** Al presionar *"Iniciar Test"*, la app bombardea a los servidores con peticiones, simulando tráfico alto.
+* **¿Qué verás?** Observarás en vivo unas barras de progreso que revelan el identificador único y la IP de cada contenedor. Verás cómo el Balanceador reparte el peso al 50/50, e incluso verás nacer un clon nuevo si el estrés continúa.
