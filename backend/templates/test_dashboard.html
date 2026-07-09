@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Cloud — Dashboard de Prueba</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0d0f14;
+            --surface:   #151820;
+            --card:      #1c2030;
+            --border:    #252a3a;
+            --accent:    #6366f1;
+            --accent2:   #22d3ee;
+            --green:     #10b981;
+            --red:        #ef4444;
+            --yellow:    #f59e0b;
+            --text:      #e2e8f0;
+            --muted:     #64748b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        .logo {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+        }
+        header h1 { font-size: 1.5rem; font-weight: 700; }
+        header p  { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+
+        .badge {
+            margin-left: auto;
+            padding: 0.3rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .badge.online  { background: rgba(16,185,129,.15); color: var(--green); border: 1px solid rgba(16,185,129,.3); }
+        .badge.offline { background: rgba(239, 68, 68,.15); color: var(--red);   border: 1px solid rgba(239,68,68,.3);  }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            transition: transform .2s, border-color .2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+        .stat-value { font-size: 2rem; font-weight: 700; margin: .25rem 0; }
+        .stat-sub   { font-size: 0.78rem; color: var(--muted); }
+        .stat-card.accent  .stat-value { color: var(--accent); }
+        .stat-card.cyan    .stat-value { color: var(--accent2); }
+        .stat-card.green   .stat-value { color: var(--green); }
+        .stat-card.yellow  .stat-value { color: var(--yellow); }
+
+        .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        @media (max-width: 768px) { .panels { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .panel-title { font-weight: 600; font-size: 0.9rem; }
+        .panel-body  { padding: 1.25rem 1.5rem; }
+
+        .endpoint-list { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+        .endpoint-item {
+            display: flex; align-items: center; gap: .75rem;
+            padding: .6rem .9rem;
+            border-radius: 8px;
+            background: var(--surface);
+            font-size: .82rem;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .endpoint-item:hover { background: var(--border); }
+        .method {
+            padding: .2rem .5rem;
+            border-radius: 5px;
+            font-size: .7rem;
+            font-weight: 700;
+            min-width: 42px;
+            text-align: center;
+        }
+        .GET    { background: rgba(34,211,238,.15); color: var(--accent2); }
+        .POST   { background: rgba(16,185,129,.15);  color: var(--green); }
+        .url    { font-family: monospace; color: var(--text); flex: 1; }
+        .desc   { color: var(--muted); font-size: .75rem; }
+
+        .test-section { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+        .test-header  { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .5rem; font-weight: 600; }
+        .test-body    { padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 768px) { .test-body { grid-template-columns: 1fr; } }
+
+        .btn {
+            padding: .7rem 1.2rem;
+            border-radius: 9px;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: .85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex; align-items: center; gap: .5rem;
+            justify-content: center;
+            transition: transform .15s, opacity .15s;
+        }
+        .btn:hover  { transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); opacity: .8; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-cyan    { background: var(--accent2); color: #0d0f14; }
+        .btn-green   { background: var(--green); color: #fff; }
+        .btn-yellow  { background: var(--yellow); color: #0d0f14; }
+        .btn-red     { background: var(--red); color: #fff; }
+        .btn-ghost   { background: var(--border); color: var(--text); }
+
+        .response-box {
+            grid-column: 1 / -1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+        .response-label { font-size: .75rem; color: var(--muted); margin-bottom: .5rem; display: flex; align-items: center; gap: .5rem; }
+        .response-label span { padding: .15rem .45rem; border-radius: 5px; font-weight: 700; font-size: .7rem; }
+        .status-ok  { background: rgba(16,185,129,.2); color: var(--green); }
+        .status-err { background: rgba(239,68,68,.2);  color: var(--red); }
+        pre {
+            font-family: 'Courier New', monospace;
+            font-size: .78rem;
+            color: var(--accent2);
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .info-row { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .info-chip {
+            display: flex; align-items: center; gap: .4rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .45rem .9rem;
+            font-size: .78rem;
+            color: var(--muted);
+        }
+        .info-chip strong { color: var(--text); }
+        .loader { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">&#9729;&#65039;</div>
+        <div>
+            <h1>CRUD Cloud &mdash; Dashboard</h1>
+            <p>Panel de prueba de la API Django + Supabase</p>
+        </div>
+        <div class="badge online" id="status-badge">
+            <span class="dot"></span>
+            <span id="status-text">Verificando...</span>
+        </div>
+    </header>
+
+    <div class="info-row">
+        <div class="info-chip">&#127760; Base URL: <strong>http://127.0.0.1:8000</strong></div>
+        <div class="info-chip">&#128451; DB: <strong>Supabase (PostgreSQL)</strong></div>
+        <div class="info-chip">&#128013; Framework: <strong>Django 4.2</strong></div>
+        <div class="info-chip">&#8987; Hora: <strong id="current-time">&mdash;</strong></div>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card accent">
+            <div class="stat-label">Clientes</div>
+            <div class="stat-value" id="count-clientes"><div class="loader"></div></div>
+            <div class="stat-sub">registros en BD</div>
+        </div>
+        <div class="stat-card cyan">
+            <div class="stat-label">Categorias</div>
+            <div class="stat-value" id="count-categorias"><div class="loader"></div></div>
+            <div class="stat-sub">tipos de cliente</div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-label">Ciudades</div>
+            <div class="stat-value" id="count-ciudades"><div class="loader"></div></div>
+            <div class="stat-sub">disponibles</div>
+        </div>
+        <div class="stat-card yellow">
+            <div class="stat-label">Regiones</div>
+            <div class="stat-value" id="count-regiones"><div class="loader"></div></div>
+            <div class="stat-sub">geograficas</div>
+        </div>
+    </div>
+
+    <div class="panels">
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">&#128279; Endpoints disponibles</span>
+            </div>
+            <div class="panel-body">
+                <ul class="endpoint-list">
+                    <li class="endpoint-item" onclick="testEndpoint('/api/clientes/')">
+                        <span class="method GET">GET</span>
+                        <span class="url">/api/clientes/</span>
+                        <span class="desc">Lista todos</span>
+                    </li>
+                    <li class="endpoint-item" onclick="testEndpoint('/api/categorias/')">
+                        <span class="method GET">GET</span>
+                        <span class="url">/api/categorias/</span>
+                        <span class="desc">Categorias</span>
+                    </li>
+                    <li class="endpoint-item" onclick="testEndpoint('/api/ciudades/')">
+                        <span class="method GET">GET</span>
+                        <span class="url">/api/ciudades/</span>
+                        <span class="desc">Ciudades</span>
+                    </li>
+                    <li class="endpoint-item" onclick="testEndpoint('/api/provincias/')">
+                        <span class="method GET">GET</span>
+                        <span class="url">/api/provincias/</span>
+                        <span class="desc">Provincias</span>
+                    </li>
+                    <li class="endpoint-item" onclick="testEndpoint('/api/regiones/')">
+                        <span class="method GET">GET</span>
+                        <span class="url">/api/regiones/</span>
+                        <span class="desc">Regiones</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">&#128421;&#65039; Estado del servidor</span>
+            </div>
+            <div class="panel-body">
+                <ul class="endpoint-list">
+                    <li class="endpoint-item">
+                        <span>&#128994;</span>
+                        <span class="url">Django runserver</span>
+                        <span class="desc">Puerto 8000</span>
+                    </li>
+                    <li class="endpoint-item">
+                        <span>&#128994;</span>
+                        <span class="url">Supabase PostgreSQL</span>
+                        <span class="desc">Session Pooler</span>
+                    </li>
+                    <li class="endpoint-item" style="cursor:pointer" onclick="window.open('http://127.0.0.1:8000/admin/')">
+                        <span>&#128279;</span>
+                        <span class="url">Django Admin</span>
+                        <span class="desc">Abrir /admin/</span>
+                    </li>
+                    <li class="endpoint-item" id="ping-item">
+                        <span id="ping-icon">&#8987;</span>
+                        <span class="url">Latencia API</span>
+                        <span class="desc" id="ping-value">Midiendo...</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-header">
+            <span>&#129514;</span>
+            <strong>Probar endpoints en vivo</strong>
+        </div>
+        <div class="test-body">
+            <button class="btn btn-primary" onclick="testEndpoint('/api/clientes/')">&#128203; GET Clientes</button>
+            <button class="btn btn-cyan"    onclick="testEndpoint('/api/categorias/')">&#127991;&#65039; GET Categorias</button>
+            <button class="btn btn-green"   onclick="testEndpoint('/api/ciudades/')">&#127961;&#65039; GET Ciudades</button>
+            <button class="btn btn-yellow"  onclick="testEndpoint('/api/regiones/')">&#128506;&#65039; GET Regiones</button>
+            <button class="btn btn-ghost"   onclick="testEndpoint('/api/provincias/')">&#128205; GET Provincias</button>
+            <button class="btn btn-red"     onclick="clearResponse()">&#128465;&#65039; Limpiar</button>
+
+            <div class="response-box">
+                <div class="response-label">
+                    Respuesta: <span id="resp-status" class="status-ok">&mdash;</span>
+                    <span id="resp-time" style="color:var(--muted)"></span>
+                </div>
+                <pre id="resp-body">// Haz clic en un endpoint para ver la respuesta aqui...</pre>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const BASE = 'http://127.0.0.1:8000';
+
+    function updateClock() {
+        document.getElementById('current-time').textContent =
+            new Date().toLocaleTimeString('es', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    async function testEndpoint(path, method = 'GET') {
+        const pre    = document.getElementById('resp-body');
+        const status = document.getElementById('resp-status');
+        const time   = document.getElementById('resp-time');
+        pre.textContent = 'Cargando...';
+        const t0 = performance.now();
+        try {
+            const res  = await fetch(BASE + path, { method, headers: { 'Accept': 'application/json' } });
+            const ms   = Math.round(performance.now() - t0);
+            const data = await res.json();
+            pre.textContent    = JSON.stringify(data, null, 2);
+            status.textContent = res.status + ' ' + res.statusText;
+            status.className   = res.ok ? 'status-ok' : 'status-err';
+            time.textContent   = ' · ' + ms + 'ms';
+        } catch (e) {
+            const ms = Math.round(performance.now() - t0);
+            pre.textContent    = 'Error: ' + e.message + '\n\nAsegurate de que Django este corriendo en ' + BASE;
+            status.textContent = 'Error de red';
+            status.className   = 'status-err';
+            time.textContent   = ' · ' + ms + 'ms';
+        }
+    }
+
+    function clearResponse() {
+        document.getElementById('resp-body').textContent = '// Respuesta limpiada.';
+        document.getElementById('resp-status').textContent = '-';
+        document.getElementById('resp-time').textContent = '';
+    }
+
+    async function loadCount(path, elId) {
+        try {
+            const res  = await fetch(BASE + path, { headers: { 'Accept': 'application/json' } });
+            const data = await res.json();
+            // API format: { ok: true, total: N, datos: [...] }
+            const count = data.total     !== undefined ? data.total
+                        : Array.isArray(data)          ? data.length
+                        : data.count                   ? data.count
+                        : data.results                 ? data.results.length : '?';
+            document.getElementById(elId).textContent = count;
+        } catch {
+            document.getElementById(elId).textContent = '--';
+        }
+    }
+
+    async function measurePing() {
+        const t0 = performance.now();
+        try {
+            await fetch(BASE + '/api/clientes/', { headers: { 'Accept': 'application/json' } });
+            const ms = Math.round(performance.now() - t0);
+            document.getElementById('ping-icon').textContent  = ms < 300 ? '🟢' : ms < 800 ? '🟡' : '🔴';
+            document.getElementById('ping-value').textContent = ms + ' ms';
+        } catch {
+            document.getElementById('ping-icon').textContent  = '🔴';
+            document.getElementById('ping-value').textContent = 'Sin conexion';
+        }
+    }
+
+    async function checkStatus() {
+        try {
+            await fetch(BASE + '/api/clientes/', { headers: { 'Accept': 'application/json' } });
+            document.getElementById('status-badge').className = 'badge online';
+            document.getElementById('status-text').textContent = 'API Online';
+        } catch {
+            document.getElementById('status-badge').className = 'badge offline';
+            document.getElementById('status-text').textContent = 'API Offline';
+        }
+    }
+
+    checkStatus();
+    measurePing();
+    loadCount('/api/clientes/',   'count-clientes');
+    loadCount('/api/categorias/', 'count-categorias');
+    loadCount('/api/ciudades/',   'count-ciudades');
+    loadCount('/api/regiones/',   'count-regiones');
+</script>
+
+</body>
+</html>

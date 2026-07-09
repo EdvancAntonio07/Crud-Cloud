@@ -1,0 +1,47 @@
+# ─────────────────────────────────────────────
+# docker-compose.yml — CRUD Multicloud (EC2)
+# Backend Django + Frontend React/Vite + Nginx
+# ─────────────────────────────────────────────
+version: "3.9"
+
+services:
+
+  # ── Backend Django ────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crud_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env        # Contiene DATABASE_URL, SECRET_KEY, etc.
+    expose:
+      - "8000"                # Solo visible dentro de la red Docker (no al exterior)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - crud_network
+
+  # ── Frontend React + Nginx ─────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: crud_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"               # Único puerto expuesto al exterior (EC2 Security Group)
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - crud_network
+
+# ── Red interna compartida ─────────────────────────────────────
+networks:
+  crud_network:
+    driver: bridge
